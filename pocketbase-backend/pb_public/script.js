@@ -5,18 +5,18 @@ let selectedFiles = [];
 let currentVoucher = null;
 let allPayments = [];
 
-const PB_PORT = '8091';
+const PB_PORT = '8080';
 
 function getDefaultPbUrl() {
   if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
     return window.location.origin;
   }
-  return localStorage.getItem('pbUrl') || `http://127.0.0.1:${PB_PORT}`;
+  return localStorage.getItem('pbUrl') || `insight-student-management.up.railway.app:${PB_PORT}`;
 }
 
 function isLocalHost() {
   const h = window.location.hostname;
-  return h === 'localhost' || h === '127.0.0.1';
+  return h === 'localhost' || h === 'insight-student-management.up.railway.app';
 }
 
 async function detectLocalNetworkIp() {
@@ -80,7 +80,7 @@ async function ensureCollection() {
   // PocketBase auto-creates collections via API if using admin, otherwise use UI
   // Here we just check if collection exists
   try {
-    await fetch(pbUrl + '/api/collections/students/records?perPage=1');
+    await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/students/records?perPage=1');
   } catch {}
 }
 
@@ -132,7 +132,7 @@ async function getNextStudentSerial(pbBaseUrl) {
   let totalPages = 1;
   do {
     const res = await fetch(
-      `${pbBaseUrl}/api/collections/students/records?perPage=500&page=${page}&fields=student_id`
+      `${pbBaseUrl}insight-student-management.up.railway.app/api/collections/students/records?perPage=500&page=${page}&fields=student_id`
     );
     if (!res.ok) break;
     const data = await res.json();
@@ -195,7 +195,7 @@ async function saveStudent() {
     Object.entries(studentData).forEach(([k, v]) => formData.append(k, v));
     selectedFiles.forEach(f => formData.append('documents', f));
  
-    const res = await fetch(pbUrl + '/api/collections/students/records', {
+    const res = await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/students/records', {
       method: 'POST', body: formData
     });
     const data = await res.json();
@@ -203,7 +203,7 @@ async function saveStudent() {
 
     const serial = await getNextStudentSerial(pbUrl);
     const sid = 'STD-' + String(serial).padStart(4, '0');
-    const patchRes = await fetch(pbUrl + '/api/collections/students/records/' + data.id, {
+    const patchRes = await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/students/records/' + data.id, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ student_id: sid })
@@ -226,7 +226,7 @@ async function loadStudents() {
     allStudents = JSON.parse(localStorage.getItem('students') || '[]');
   } else {
     try {
-      const res = await fetch(pbUrl + '/api/collections/students/records?perPage=500&sort=-created');
+      const res = await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/students/records?perPage=500&sort=-created');
       const data = await res.json();
       allStudents = data.items || [];
     } catch { allStudents = JSON.parse(localStorage.getItem('students') || '[]'); }
@@ -304,7 +304,7 @@ async function loadPaymentHistory() {
     allPayments = local;
   } else {
     try {
-      const res = await fetch(pbUrl + '/api/collections/fee_payments/records?perPage=500&sort=-paid_at,-created');
+      const res = await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/fee_payments/records?perPage=500&sort=-paid_at,-created');
       if (res.ok) {
         const remote = (await res.json()).items || [];
         const merged = new Map();
@@ -396,7 +396,7 @@ async function savePaymentRecord(record) {
     const filter = encodeURIComponent(
       `(student_id='${record.student_id}' && month='${record.month}' && year=${record.year})`
     );
-    const existingRes = await fetch(pbUrl + `/api/collections/fee_payments/records?filter=${filter}&perPage=1`);
+    const existingRes = await fetch(pbUrl + `insight-student-management.up.railway.app/api/collections/fee_payments/records?filter=${filter}&perPage=1`);
     if (existingRes.status === 404) return record;
 
     const existingData = await existingRes.json();
@@ -415,13 +415,13 @@ async function savePaymentRecord(record) {
 
     let res;
     if (existing) {
-      res = await fetch(pbUrl + '/api/collections/fee_payments/records/' + existing.id, {
+      res = await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/fee_payments/records/' + existing.id, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
     } else {
-      res = await fetch(pbUrl + '/api/collections/fee_payments/records', {
+      res = await fetch(pbUrl + 'insight-student-management.up.railway.app/api/collections/fee_payments/records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -446,7 +446,7 @@ async function fetchStudentForVoucher() {
 
   if (!student && pbConnected) {
     try {
-      const res = await fetch(pbUrl + `/api/collections/students/records?filter=(student_id='${sid}')`);
+      const res = await fetch(pbUrl + `insight-student-management.up.railway.app/api/collections/students/records?filter=(student_id='${sid}')`);
       const data = await res.json();
       student = data.items && data.items[0];
     } catch {}
