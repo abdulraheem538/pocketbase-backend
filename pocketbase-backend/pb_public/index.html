@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="styles.css" />
+<script src="script.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  
+</style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pocketbase/0.21.1/pocketbase.umd.js"></script>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+    Insight Academy
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchPage('registration')">Student Registration</button>
+    <button class="nav-btn" onclick="switchPage('voucher')">Fee Voucher</button>
+    <button class="nav-btn" onclick="switchPage('students')">All Students</button>
+  </nav>
+</header>
+
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════ REGISTRATION PAGE -->
+<div class="page active" id="page-registration">
+
+  <div class="pb-status" id="pb-status">
+    <div class="pb-dot" id="pb-dot"></div>
+    <span id="pb-status-text">PocketBase not connected</span>
+    <div style="flex:1"></div>
+    <input class="pb-url-input" id="pb-url" type="text" placeholder="http://192.168.1.5:8091" />
+    <button class="pb-connect-btn" onclick="connectPocketBase()">Connect</button>
+  </div>
+  <div class="pb-network-hint" id="pb-network-hint" style="display:none"></div>
+
+  <div class="page-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Register New Student
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      Student Identity
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Student ID (Auto-generated)</label>
+        <div class="id-badge" id="student-id-display">Will be assigned on save</div>
+      </div>
+      <div class="form-group">
+        <label>Enrollment Date</label>
+        <input type="date" id="enrollment-date" />
+      </div>
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="full-name" placeholder="e.g. Muhammad Ali Khan" />
+      </div>
+      <div class="form-group">
+        <label>Father's Name *</label>
+        <input type="text" id="father-name" placeholder="e.g. Ahmad Khan" />
+      </div>
+      <div class="form-group">
+        <label>Date of Birth</label>
+        <input type="date" id="dob" />
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select id="gender">
+          <option value="">Select</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Contact Number *</label>
+        <input type="tel" id="contact" placeholder="+92 300 0000000" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="student@email.com" />
+      </div>
+      <div class="form-group full">
+        <label>Address</label>
+        <input type="text" id="address" placeholder="Street, City" />
+      </div>
+      <div class="form-group">
+        <label>Class / Grade</label>
+        <input type="text" id="class-name" placeholder="e.g. Class 9-A" />
+      </div>
+      <div class="form-group">
+        <label>Program / Department</label>
+        <input type="text" id="program" placeholder="e.g. Science" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Documents
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>CNIC / B-Form Number</label>
+        <input type="text" id="cnic" placeholder="00000-0000000-0" />
+      </div>
+      <div class="form-group">
+        <label>Previous School</label>
+        <input type="text" id="prev-school" placeholder="School name" />
+      </div>
+    </div>
+    <div style="margin-top:1rem">
+      <label style="display:block; margin-bottom:6px;">Upload Documents (Photos, PDFs)</label>
+      <div class="file-upload-area" onclick="document.getElementById('doc-files').click()">
+        <input type="file" id="doc-files" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this)" />
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5" style="margin:0 auto 6px; display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div class="file-upload-label">Click to upload documents</div>
+        <div style="font-size:0.75rem;color:var(--text2);margin-top:2px">PDF, JPG, PNG supported</div>
+      </div>
+      <div class="file-list" id="file-list"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Fee Structure
+    </div>
+    <div class="form-grid three">
+      <div class="form-group">
+        <label>Base Fee (PKR) *</label>
+        <input type="number" id="base-fee" placeholder="e.g. 5000" oninput="calcFee()" />
+      </div>
+      <div class="form-group">
+        <label>Discount (%)</label>
+        <input type="number" id="discount-pct" placeholder="0" min="0" max="100" oninput="calcFee()" />
+      </div>
+      <div class="form-group">
+        <label>Discount Amount (PKR)</label>
+        <input type="number" id="discount-amt" placeholder="0" oninput="calcFeeFromAmt()" />
+      </div>
+    </div>
+    <div style="margin-top:1.25rem; background:var(--bg); border-radius:8px; padding:1rem;">
+      <div class="fee-row">
+        <span class="fee-label">Base Fee</span>
+        <span class="fee-value" id="display-base">PKR 0</span>
+      </div>
+      <div class="fee-row">
+        <span class="fee-label">Discount</span>
+        <span class="fee-value" style="color:var(--success)" id="display-discount">- PKR 0</span>
+      </div>
+      <div class="fee-row" style="border-bottom:none; margin-top:4px;">
+        <span class="fee-label" style="font-weight:600;color:var(--text)">Net Monthly Fee</span>
+        <span class="fee-total" id="display-net">PKR 0</span>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:1rem">
+      <label>Additional Notes on Fee</label>
+      <input type="text" id="fee-notes" placeholder="e.g. Scholarship student, late fee waived" />
+    </div>
+  </div>
+
+  <div style="display:flex; gap:10px; justify-content:flex-end; margin-bottom:2rem">
+    <button class="btn btn-outline" onclick="clearForm()">Clear Form</button>
+    <button class="btn btn-primary" onclick="saveStudent()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Student
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ VOUCHER PAGE -->
+<div class="page" id="page-voucher">
+  <div class="page-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+    Fee Voucher Generator
+  </div>
+
+  <div class="card no-print">
+    <div class="card-title">Find Student</div>
+    <div style="display:flex;gap:12px;align-items:flex-end">
+      <div class="form-group" style="flex:1">
+        <label>Enter Student ID</label>
+        <input type="text" id="voucher-student-id" placeholder="e.g. STD-0001" onkeyup="if(event.key==='Enter') fetchStudentForVoucher()" style="font-family:monospace; font-size:1rem;" />
+      </div>
+      <div class="form-group" style="flex:1">
+        <label>Month</label>
+        <select id="voucher-month">
+          <option value="January">January</option><option value="February">February</option>
+          <option value="March">March</option><option value="April">April</option>
+          <option value="May" selected>May</option><option value="June">June</option>
+          <option value="July">July</option><option value="August">August</option>
+          <option value="September">September</option><option value="October">October</option>
+          <option value="November">November</option><option value="December">December</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Year</label>
+        <input type="number" id="voucher-year" value="2025" style="width:90px" />
+      </div>
+      <button class="btn btn-primary" onclick="fetchStudentForVoucher()" style="margin-bottom:1px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search
+      </button>
+    </div>
+  </div>
+
+  <div id="voucher-output" style="display:none">
+    <div class="voucher-controls no-print actions-row" style="margin-bottom:1rem">
+      <span id="voucher-status-badge" class="badge badge-pending">Pending</span>
+      <div class="spacer"></div>
+      <button class="btn btn-outline btn-sm" id="mark-paid-btn" onclick="markPaid()">Mark as Paid</button>
+      <button class="btn btn-accent btn-sm" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print Voucher
+      </button>
+    </div>
+
+    <div class="voucher-wrap">
+      <div class="voucher-header">
+        <h2 id="v-school-name">Insight Academy</h2>
+        <p>Fee Payment Voucher</p>
+        <span id="v-paid-stamp" class="voucher-paid-stamp" style="display:none">PAID</span>
+      </div>
+      <div class="voucher-body">
+        <div class="voucher-meta">
+          <div class="voucher-field">
+            <div class="voucher-field-label">Student ID</div>
+            <div class="voucher-field-value"><span class="id-tag" id="v-student-id"></span></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Voucher No.</div>
+            <div class="voucher-field-value" id="v-voucher-no" style="font-family:monospace"></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Student Name</div>
+            <div class="voucher-field-value" id="v-name"></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Father's Name</div>
+            <div class="voucher-field-value" id="v-father"></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Class / Program</div>
+            <div class="voucher-field-value" id="v-class"></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Month</div>
+            <div class="voucher-field-value" id="v-month"></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Issue Date</div>
+            <div class="voucher-field-value" id="v-issue-date"></div>
+          </div>
+          <div class="voucher-field">
+            <div class="voucher-field-label">Due Date</div>
+            <div class="voucher-field-value" id="v-due-date"></div>
+          </div>
+        </div>
+        <hr class="voucher-divider" />
+        <table class="voucher-fee-table">
+          <tr><td style="color:var(--text2)">Base Monthly Fee</td><td id="v-base-fee"></td></tr>
+          <tr><td style="color:var(--text2)">Discount</td><td id="v-discount" style="color:var(--success)"></td></tr>
+          <tr id="v-notes-row" style="display:none"><td style="color:var(--text2);font-size:0.8rem" id="v-notes-label"></td><td></td></tr>
+          <tr class="voucher-total-row"><td>Net Amount Payable</td><td id="v-net-fee"></td></tr>
+        </table>
+        <div style="margin-top:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div style="border:1px dashed var(--border); border-radius:6px; padding:10px 14px;">
+            <div style="font-size:0.75rem;color:var(--text2);margin-bottom:24px">Bank / Payment Details</div>
+            <div style="font-size:0.8rem;color:var(--text2)">Signature & Stamp</div>
+          </div>
+          <div style="border:1px dashed var(--border); border-radius:6px; padding:10px 14px;">
+            <div style="font-size:0.75rem;color:var(--text2);margin-bottom:24px">Student / Parent Copy</div>
+            <div style="font-size:0.8rem;color:var(--text2)">Received By</div>
+          </div>
+        </div>
+      </div>
+      <div class="voucher-footer">
+        Please pay before the due date to avoid late fee charges. Keep this voucher as proof of payment.
+      </div>
+    </div>
+  </div>
+
+  <div class="card no-print" style="margin-top:1.5rem">
+    <div class="card-title">Payment History</div>
+    <div class="actions-row">
+      <div class="search-box" style="flex:1">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="payment-search-input" placeholder="Search by student ID, name, month, voucher..." oninput="renderPaymentHistory()" />
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadPaymentHistory()">Refresh</button>
+    </div>
+    <div id="payment-history-wrap">
+      <div class="empty-state">No payment records yet. Mark a voucher as paid to see it here.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ STUDENTS LIST PAGE -->
+<div class="page" id="page-students">
+  <div class="page-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    All Students
+  </div>
+  <div class="card">
+    <div class="actions-row">
+      <div class="search-box" style="flex:1">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" placeholder="Search by name, ID, class..." oninput="renderStudentTable()" />
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadStudents()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div id="student-table-wrap">
+      <div class="empty-state">No students loaded. Connect to PocketBase and click Refresh.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+</script>
+</body>
+</html>
